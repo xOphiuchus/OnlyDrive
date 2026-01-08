@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/rs/zerolog/log"
+	"github.com/xOphiuchus/OnlyDrive/cmd/api"
 	"github.com/xOphiuchus/OnlyDrive/config"
 	"github.com/xOphiuchus/OnlyDrive/db"
 	"github.com/xOphiuchus/OnlyDrive/logger"
@@ -24,8 +27,16 @@ func main() {
 		config.DBName,
 	)
 	log.Info().Msg("Database connection established successfully")
-	_ = db.GetDB()
+	dbInstance := db.GetDB()
 
 	log.Debug().Msgf("Initial stuff done now moving to API")
+
+	apiServer := api.NewAPIServer(fmt.Sprintf(":%d", config.APPPort), dbInstance)
+
+	log.Debug().Msg("Trying to start API server in main.go")
+
+	if err := apiServer.Start(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to start API server")
+	}
 
 }
